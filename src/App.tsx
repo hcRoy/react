@@ -41,11 +41,11 @@ const App: React.FC = () => {
   const [reset, setReset] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const inputNumberHandler = (e: any) => {
-    setInputNumber(+e.target.value);
+  const inputNumberHandler = (e: React.FormEvent<HTMLInputElement>): void => {
+    setInputNumber(+e.currentTarget.value);
   };
 
-  const startTrivia = async (e: any) => {
+  const startTrivia = async (e: React.SyntheticEvent) => {
     setIsSubmitted(true);
     e.preventDefault();
     setLoading(true);
@@ -77,22 +77,21 @@ const App: React.FC = () => {
     }
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = (): void => {
     // Move on to the next question if not the last question
 
     setNumber((prev) => prev + 1);
   };
 
-  const handleOpen = () => {
+  const handleOpen = (): void => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setOpen(false);
   };
 
-  const resetHandler = () => {
-    console.log("i am inside reset");
+  const resetHandler = (): void => {
     setGameOver(true);
     setIsSubmitted(false);
     setQuestions([]);
@@ -106,7 +105,6 @@ const App: React.FC = () => {
     setOpen(false);
   };
 
-  console.log(number);
   return (
     <>
       <GlobalStyle />
