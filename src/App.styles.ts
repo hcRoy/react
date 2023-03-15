@@ -16,7 +16,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   * {
-    font-family: 'Catamaran', sans-serif;
+    font-family: 'Montserrat',    sans-serif;
     box-sizing: border-box;
   }
 `;
@@ -38,7 +38,25 @@ export const Wrapper = styled.div`
 
   img {
     width: 12rem;
-    margin-top: 2rem;
+    margin: 2rem 0;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .btn {
+    display: flex;
+    justify-content: center;
   }
 
   .start,

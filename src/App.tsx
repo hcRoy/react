@@ -7,12 +7,26 @@ import { QuestionsState, Difficulty } from "./API";
 // Styles
 import { GlobalStyle, Wrapper } from "./App.styles";
 import LogoImage from "./images/quiz-logo.png";
+import { Button } from "@mui/material";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 export type AnswerObject = {
   question: string;
   answer: string;
   correct: boolean;
   correctAnswer: string;
+};
+
+const style = {
+  margin: "0 auto",
+  marginTop: "12.8rem",
+  padding: "0",
+  maxWidth: "20rem",
+  backgroundColor: "#eff4f7",
+  boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.25)",
+  borderRadius: "10px",
 };
 
 const App: React.FC = () => {
@@ -25,20 +39,16 @@ const App: React.FC = () => {
   const [inputNumber, setInputNumber] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [reset, setReset] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const inputNumberHandler = (e: any) => {
-    setInputNumber(e.target.value);
+    setInputNumber(+e.target.value);
   };
 
-  const submitHandler = (e: any) => {
-    e.preventDefault();
-    console.log(inputNumber);
+  const startTrivia = async (e: any) => {
     setIsSubmitted(true);
-  };
-
-  const startTrivia = async () => {
+    e.preventDefault();
     setLoading(true);
-    // setIsSubmitted(true);
     setGameOver(false);
     const newQuestions = await fetchQuizQuestions(inputNumber, Difficulty.EASY);
     setQuestions(newQuestions);
@@ -69,54 +79,55 @@ const App: React.FC = () => {
 
   const nextQuestion = () => {
     // Move on to the next question if not the last question
-    const nextQ = number + 1;
 
-    if (nextQ === inputNumber) {
-      // setGameOver(true);
-      // setIsSubmitted(false);
-      setReset(true);
-      console.log("i am inside");
-    } else {
-      setNumber(nextQ);
-    }
+    setNumber((prev) => prev + 1);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const resetHandler = () => {
     console.log("i am inside reset");
     setGameOver(true);
     setIsSubmitted(false);
+    setQuestions([]);
+    setLoading(false);
+    setScore(0);
+    setNumber(0);
+    setUserAnswers([]);
+    setInputNumber(0);
+    setIsSubmitted(false);
     setReset(false);
+    setOpen(false);
   };
 
+  console.log(number);
   return (
     <>
       <GlobalStyle />
       <Wrapper>
         <img alt="logoimage" src={LogoImage}></img>
-        {!isSubmitted || userAnswers.length === inputNumber ? (
-          <form onSubmit={submitHandler}>
-            <label htmlFor="number">Number of Questions:</label>
-            <input
-              id="number"
-              type="number"
-              onChange={inputNumberHandler}
-            ></input>
-            <label htmlFor="level">Choose Difficulty Level:</label>
-            <select name="level" id="level">
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-            <button>START</button>
+        {!reset && !isSubmitted ? (
+          <form onSubmit={startTrivia}>
+            <div className="number">
+              <label htmlFor="number">Number of Questions: </label>
+              <input
+                id="number"
+                type="number"
+                onChange={inputNumberHandler}
+              ></input>
+            </div>
+            <div className="btn">
+              <Button onClick={startTrivia} variant="contained" sx={{ mt: 2 }}>
+                START
+              </Button>
+            </div>
           </form>
-        ) : null}
-        {gameOver || userAnswers.length === inputNumber ? (
-          <button className="start" onClick={startTrivia}>
-            Start
-          </button>
-        ) : null}
-        {isSubmitted && !gameOver ? (
-          <p className="score">Score: {score}</p>
         ) : null}
         {loading ? <p>Loading Questions...</p> : null}
         {!loading && !gameOver && (
@@ -133,15 +144,69 @@ const App: React.FC = () => {
         !gameOver &&
         !loading &&
         userAnswers.length === number + 1 &&
-        number !== inputNumber - 1 ? (
-          <button className="next" onClick={nextQuestion}>
+        inputNumber !== number + 1 ? (
+          <Button sx={{ mt: 2 }} variant="contained" onClick={nextQuestion}>
             Next Question
-          </button>
+          </Button>
         ) : null}
-        {reset && number !== inputNumber && (
-          <button className="next" onClick={resetHandler}>
-            reset
-          </button>
+
+        {!gameOver && !loading && userAnswers.length === inputNumber && (
+          <>
+            <Button onClick={handleOpen} variant="contained" sx={{ mt: 2 }}>
+              Result
+            </Button>
+            <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <>
+                <Box sx={style}>
+                  <Typography
+                    id="modal-modal-title"
+                    variant="h6"
+                    component="h2"
+                    style={{
+                      backgroundColor: "#1976d2",
+                      textAlign: "center",
+                      color: "white",
+                      padding: "0.6rem 0",
+                      borderTopLeftRadius: "10px",
+                      borderTopRightRadius: "10px",
+                    }}
+                  >
+                    SCOREBOARD
+                  </Typography>
+                  <Typography
+                    id="modal-modal-description"
+                    sx={{ mt: 2, ml: 1 }}
+                  >
+                    <p>Total Question: {inputNumber}</p>
+                    <p>Correct Answer: {score}</p>
+                    <p>
+                      Congratulation!🥳 You Scored {score} marks out of{" "}
+                      {inputNumber}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Button
+                        onClick={resetHandler}
+                        variant="contained"
+                        sx={{ mb: 2 }}
+                      >
+                        Reset
+                      </Button>
+                    </div>
+                  </Typography>
+                </Box>
+              </>
+            </Modal>
+          </>
         )}
       </Wrapper>
     </>
